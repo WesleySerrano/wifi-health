@@ -16,6 +16,11 @@ public class WifiServices {
         return connectivityManager.getActiveNetworkInfo() != null && connectivityManager.getActiveNetworkInfo().isConnectedOrConnecting();
     }
 
+    public void scanNetworks()
+    {
+
+    }
+
     public static WifiServices getInstance(){
         if(instance == null) instance = new WifiServices();
 
