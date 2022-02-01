@@ -5,31 +5,30 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.wserrano.WifiHealth;
+import com.wserrano.wifi_health.interfaces.IWifiScanResultReceiver;
+import com.wserrano.wifi_health.model.WifiData;
 import com.wserrano.wifi_health.receivers.WifiEventBroadcastReceiver;
 import com.wserrano.wifi_health.services.WifiServices;
 
-import java.net.UnknownHostException;
-import java.sql.Array;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity
+        implements AdapterView.OnItemSelectedListener, IWifiScanResultReceiver {
     WifiManager wifiManager;
+    Map<String, WifiData> networksDatas = new HashMap<>();
 
     private void updateConnectionStatus(){
         TextView tv = findViewById(R.id.id_connection_test);
@@ -48,59 +47,18 @@ public class MainActivity extends AppCompatActivity {
         registerReceiver(receiver, intentFilter);
     }
 
-    private void updateNetworksList()
+    private void updateNetworksList(Map<String, WifiData> networksDatas)
     {
-        List<ScanResult> scanResults = wifiManager.getScanResults();
+        this.networksDatas.putAll(networksDatas);
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<String>(networksDatas.keySet()));
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         Spinner spinner = (Spinner) findViewById(R.id.id_spinner_network_selection);
-        List<String> networksNames = new ArrayList<>();
-
-        for(ScanResult result : scanResults)
-        {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                networksNames.add(result.SSID);
-            }
-        }
+        spinner.setAdapter(adapter);
+        spinner.setOnItemSelectedListener(this);
 
         System.out.println("Network list");
-    }
-
-    private void scanSuccess() {
-        updateNetworksList();
-        System.out.println("Scan success");
-    }
-    private void scanFailure() {
-        updateNetworksList();
-        System.out.println("Scan failure");
-    }
-
-    private void listNetworks(){
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-
-        BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context c, Intent intent) {
-                boolean success = intent.getBooleanExtra(
-                        WifiManager.EXTRA_RESULTS_UPDATED, false);
-                if (success) {
-                    scanSuccess();
-                } else {
-                    // scan failure handling
-                    scanFailure();
-                }
-            }
-
-        };
-
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiManager.SCAN_RESULTS_AVAILABLE_ACTION);
-        registerReceiver(wifiScanReceiver, intentFilter);
-
-        boolean success = wifiManager.startScan();
-        if(!success)
-        {
-            scanFailure();
-        }
     }
 
     private void checkPermissions()
@@ -136,6 +94,41 @@ public class MainActivity extends AppCompatActivity {
 
         updateConnectionStatus();
         registerIntents();
-        listNetworks();
+        WifiServices.scanNetworks(this);
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String item = parent.getAdapter().getItem(position).toString();
+
+        System.out.println("/***********************************/");
+        System.out.println(item);
+        System.out.println("/***********************************/");
+
+        TextView connectionNameTextView = (TextView)findViewById(R.id.textViewConnectionName);
+        TextView frequencyTextView = (TextView)findViewById(R.id.textViewFrequency);
+        TextView rssiTextView = (TextView)findViewById(R.id.textViewRSSI);
+
+        StringBuffer connectionNamePrefix = new StringBuffer("SSID: ");
+        StringBuffer frequencyPrefix = new StringBuffer("Frequency: ");
+        StringBuffer rssiPrefix = new StringBuffer("RSSI: ");
+        if(this.networksDatas.get(item) == null) return;
+        connectionNamePrefix.append(this.networksDatas.get(item).getWifiName());
+        frequencyPrefix.append(this.networksDatas.get(item).getFrequency());
+        rssiPrefix.append(this.networksDatas.get(item).getSignalStrength());
+
+        connectionNameTextView.setText(connectionNamePrefix.toString());
+        frequencyTextView.setText(frequencyPrefix.toString());
+        rssiTextView.setText(rssiPrefix.toString());
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
+    @Override
+    public void receiveWifiScanResult(Map<String, WifiData> networksDatas) {
+        this.updateNetworksList(networksDatas);
     }
 }

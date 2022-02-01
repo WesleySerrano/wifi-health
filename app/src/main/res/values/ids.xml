@@ -1,2 +1,3 @@
 <resources>
+    <string name="id_spinner_networl_select" type="id">spinner_networl_select</string>
 </resources>

@@ -14,9 +14,23 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.228" />
+
+    <TextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="153dp"
+        android:text="Available connections:"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <Spinner
+        android:id="@+id/id_spinner_network_selection"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="1dp"
@@ -24,7 +38,38 @@
         android:layout_marginEnd="1dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        android:id="@+id/id_spinner_network_selection"/>
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <LinearLayout
+        android:id="@+id/linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginStart="1dp"
+        android:layout_marginEnd="1dp"
+        android:layout_marginBottom="1dp"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView">
+
+        <TextView
+            android:id="@+id/textViewConnectionName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="SSID: -" />
+
+        <TextView
+            android:id="@+id/textViewRSSI"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="RSSI: -" />
+
+        <TextView
+            android:id="@+id/textViewFrequency"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Frequency: -" />
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

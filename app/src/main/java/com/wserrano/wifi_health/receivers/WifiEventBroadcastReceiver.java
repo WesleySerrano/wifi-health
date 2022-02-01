@@ -29,7 +29,7 @@ public class WifiEventBroadcastReceiver extends BroadcastReceiver {
                     @Override
                     public void run() {
                         TextView tv = ((Activity) context).findViewById(R.id.id_connection_test);
-                        tv.setText("AAAA");
+                        tv.setText("Connected");
                     }
                 });
             }
