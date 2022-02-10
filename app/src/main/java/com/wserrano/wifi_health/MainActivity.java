@@ -16,13 +16,14 @@ import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.wserrano.wifi_health.interfaces.IWifiScanResultReceiver;
-import com.wserrano.wifi_health.model.WifiData;
-import com.wserrano.wifi_health.receivers.WifiEventBroadcastReceiver;
-import com.wserrano.wifi_health.services.WifiServices;
+import com.wserrano.wifi_health.monitoring.interfaces.IWifiScanResultReceiver;
+import com.wserrano.wifi_health.monitoring.model.WifiData;
+import com.wserrano.wifi_health.monitoring.receivers.WifiEventBroadcastReceiver;
+import com.wserrano.wifi_health.monitoring.services.WifiServices;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity
@@ -42,16 +43,20 @@ public class MainActivity extends AppCompatActivity
 
         Handler handler = new Handler();
 
-        WifiEventBroadcastReceiver receiver = new WifiEventBroadcastReceiver(handler);
+        WifiEventBroadcastReceiver receiver = new WifiEventBroadcastReceiver(handler, this);
 
         registerReceiver(receiver, intentFilter);
     }
 
     private void updateNetworksList(Map<String, WifiData> networksDatas)
     {
-        this.networksDatas.putAll(networksDatas);
+        this.clearTexts();
+        this.networksDatas.clear();
+        if(networksDatas != null && networksDatas.size() > 0) this.networksDatas.putAll(networksDatas);
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, new ArrayList<String>(networksDatas.keySet()));
+        List<String> adapterEntries = (networksDatas != null) ? new ArrayList<String>(networksDatas.keySet()) : new ArrayList<String>();
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, adapterEntries);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         Spinner spinner = (Spinner) findViewById(R.id.id_spinner_network_selection);
@@ -97,29 +102,57 @@ public class MainActivity extends AppCompatActivity
         WifiServices.scanNetworks(this);
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        String item = parent.getAdapter().getItem(position).toString();
-
-        System.out.println("/***********************************/");
-        System.out.println(item);
-        System.out.println("/***********************************/");
-
+    private void clearTexts()
+    {
         TextView connectionNameTextView = (TextView)findViewById(R.id.textViewConnectionName);
         TextView frequencyTextView = (TextView)findViewById(R.id.textViewFrequency);
         TextView rssiTextView = (TextView)findViewById(R.id.textViewRSSI);
+        TextView channelWidthTextView = (TextView)findViewById(R.id.textViewChannelWidth);
+        TextView is80211mcResponderTextView = (TextView)findViewById(R.id.textViewIs80211mcResponder);
 
-        StringBuffer connectionNamePrefix = new StringBuffer("SSID: ");
-        StringBuffer frequencyPrefix = new StringBuffer("Frequency: ");
-        StringBuffer rssiPrefix = new StringBuffer("RSSI: ");
-        if(this.networksDatas.get(item) == null) return;
-        connectionNamePrefix.append(this.networksDatas.get(item).getWifiName());
-        frequencyPrefix.append(this.networksDatas.get(item).getFrequency());
-        rssiPrefix.append(this.networksDatas.get(item).getSignalStrength());
+        StringBuffer connectionNamePrefix = new StringBuffer("SSID: -");
+        StringBuffer frequencyPrefix = new StringBuffer("Frequency: -");
+        StringBuffer rssiPrefix = new StringBuffer("RSSI: -");
+        StringBuffer channelWidth = new StringBuffer("Channel Width: -");
+        StringBuffer is80211mc = new StringBuffer("Is 802.11mc responder: -");
 
         connectionNameTextView.setText(connectionNamePrefix.toString());
         frequencyTextView.setText(frequencyPrefix.toString());
         rssiTextView.setText(rssiPrefix.toString());
+        channelWidthTextView.setText(channelWidth.toString());
+        is80211mcResponderTextView.setText(is80211mc.toString());
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        String item = parent.getAdapter().getItem(position).toString();
+
+        TextView connectionNameTextView = (TextView)findViewById(R.id.textViewConnectionName);
+        TextView frequencyTextView = (TextView)findViewById(R.id.textViewFrequency);
+        TextView rssiTextView = (TextView)findViewById(R.id.textViewRSSI);
+        TextView channelWidthTextView = (TextView)findViewById(R.id.textViewChannelWidth);
+        TextView is80211mcResponderTextView = (TextView)findViewById(R.id.textViewIs80211mcResponder);
+
+        StringBuffer connectionNamePrefix = new StringBuffer("SSID: ");
+        StringBuffer frequencyPrefix = new StringBuffer("Frequency: ");
+        StringBuffer rssiPrefix = new StringBuffer("RSSI: ");
+        StringBuffer channelWidth = new StringBuffer("Channel Width: ");
+        StringBuffer is80211mc = new StringBuffer("Is 802.11mc responder: ");
+
+        if(this.networksDatas.get(item) != null)
+        {
+            connectionNamePrefix.append(this.networksDatas.get(item).getWifiName());
+            frequencyPrefix.append(this.networksDatas.get(item).getFrequency());
+            rssiPrefix.append(this.networksDatas.get(item).getSignalStrength());
+            channelWidth.append(this.networksDatas.get(item).getChannelWidth());
+            is80211mc.append(this.networksDatas.get(item).getIs80211mc() ? "Yes" : "No");
+        }
+
+        connectionNameTextView.setText(connectionNamePrefix.toString());
+        frequencyTextView.setText(frequencyPrefix.toString());
+        rssiTextView.setText(rssiPrefix.toString());
+        channelWidthTextView.setText(channelWidth.toString());
+        is80211mcResponderTextView.setText(is80211mc.toString());
     }
 
     @Override
@@ -131,4 +164,11 @@ public class MainActivity extends AppCompatActivity
     public void receiveWifiScanResult(Map<String, WifiData> networksDatas) {
         this.updateNetworksList(networksDatas);
     }
+
+    @Override
+    public void clearResults() {
+        this.updateNetworksList(null);
+    }
+
+
 }

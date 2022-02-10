@@ -1,4 +1,4 @@
-package com.wserrano.wifi_health.services;
+package com.wserrano.wifi_health.monitoring.services;
 
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -8,14 +8,10 @@ import android.net.ConnectivityManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
-import android.widget.Spinner;
 
 import com.wserrano.WifiHealth;
-import com.wserrano.wifi_health.R;
-import com.wserrano.wifi_health.interfaces.IWifiScanResultReceiver;
-import com.wserrano.wifi_health.model.WifiData;
-
-import org.json.JSONArray;
+import com.wserrano.wifi_health.monitoring.interfaces.IWifiScanResultReceiver;
+import com.wserrano.wifi_health.monitoring.model.WifiData;
 
 import java.util.HashMap;
 import java.util.List;
@@ -43,6 +39,7 @@ public class WifiServices {
     {
         WifiManager wifiManager = (WifiManager) WifiHealth.getAppContext().getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         Map<String, WifiData> networksDatas = new HashMap<>();
+        receiver.clearResults();
 
         BroadcastReceiver wifiScanReceiver = new BroadcastReceiver() {
 

@@ -1,6 +1,9 @@
-package com.wserrano.wifi_health.model;
+package com.wserrano.wifi_health.monitoring.model;
 
 import android.net.wifi.ScanResult;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 public class WifiData {
 
@@ -8,6 +11,10 @@ public class WifiData {
     private Double signalStrength;
     private Double distance;
     private Double frequency;
+    private Boolean is80211mc;
+    private Double channelWidth;
+
+    private Double centimetersDistance;
 
 
     public WifiData()
@@ -27,6 +34,9 @@ public class WifiData {
         this.wifiName = scanResult.SSID;
         this.signalStrength = Double.valueOf(scanResult.level);
         this.frequency = Double.valueOf(scanResult.frequency);
+        this.channelWidth = Double.valueOf(scanResult.channelWidth);
+        this.is80211mc = scanResult.is80211mcResponder();
+
     }
 
     public String getWifiName() {
@@ -59,5 +69,29 @@ public class WifiData {
 
     public void setFrequency(Double frequency) {
         this.frequency = frequency;
+    }
+
+    public Double getCentimetersDistance() {
+        return centimetersDistance;
+    }
+
+    public void setCentimetersDistance(Double centimetersDistance) {
+        this.centimetersDistance = centimetersDistance;
+    }
+
+    public Boolean getIs80211mc() {
+        return is80211mc;
+    }
+
+    public void setIs80211mc(Boolean is80211mc) {
+        this.is80211mc = is80211mc;
+    }
+
+    public Double getChannelWidth() {
+        return channelWidth;
+    }
+
+    public void setChannelWidth(Double channelWidth) {
+        this.channelWidth = channelWidth;
     }
 }
